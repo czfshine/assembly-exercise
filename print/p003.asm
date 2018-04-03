@@ -1,7 +1,7 @@
 ; 8086 assembly file
 ; by:czfshine
 ; date: 2018/04/03 12:18:43
-
+;试编制一个程序，把BX寄存器内的二进制数以十进制数的形式在屏幕上显示出来。
 ; The Main Data segment
 DATA SEGMENT
 DATA ENDS
