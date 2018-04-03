@@ -2,6 +2,9 @@
 ; by:czfshine
 ; date: 2018/04/03 12:36:16
 
+;从键盘上输入2个一位数，求出它们的和（假设和不超过1位）。
+
+
 ; The Main Data segment
 DATA SEGMENT
 DATA ENDS
