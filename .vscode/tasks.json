@@ -12,9 +12,21 @@
             },
             "isBackground": true,
             "windows": {
-                "command": "(copy ${file} .\\env\\cache\\HELLO.ASM) -and (cd .\\env\\DOSBox) -and (.\\DosBox.exe)",
+                "command": "(copy ${file} .\\env\\cache\\HELLO.ASM) -and (cd .\\env\\DOSBox) -and (.\\DosBox.exe)"
             }
-
+        },
+        {
+            "label": "start DosBox",
+            "type": "shell",
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            },
+            "isBackground": true,
+            "windows": {
+                "command": " cd .\\env\\DOSBox ; .\\DosBox.exe"
+            },
+            "problemMatcher": []
         },
         {
             "label": "copy to dosbox",
@@ -25,9 +37,8 @@
             },
             "isBackground": true,
             "windows": {
-                "command": "copy ${file} .\\env\\cache\\HELLO.ASM ",
+                "command": "copy ${file} .\\env\\cache\\HELLO.ASM "
             }
-
         }
     ]
 }
