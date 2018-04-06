@@ -2,10 +2,16 @@
 ; by:czfshine
 ; date: 2018/04/06 18:04:58
 
+basedata SEGMENT
+    chart db '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+    _     db 'abcdefghijklmnopqrstuvwxyz@#'
+basedata ENDS
 base SEGMENT
     ;改变进制输出
     ;bx,si
-    rebase PROC FAR USES AX CX DX
+    rebase PROC FAR USES AX bx CX DX Ds
+        MOV AX,baseDATA
+        MOV DS,AX
         XOR CX,CX
         MOV AX,BX
         p:
@@ -20,7 +26,9 @@ base SEGMENT
         mov ah,02h
         pr:
             pop dx
-            add dl,'0'
+            lea bx,chart
+            add bx,dx
+            mov dl,[bx]
             int 21H
         loop pr
     RET

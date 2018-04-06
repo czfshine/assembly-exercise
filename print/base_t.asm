@@ -28,7 +28,7 @@ START:                ;entry point
         CALL REBASE
         CALL CRLF
         INC SI
-        CMP SI,11
+        CMP SI,65
     JNZ L
 
 
