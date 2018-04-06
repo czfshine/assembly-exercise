@@ -6,12 +6,12 @@ phexs SEGMENT
 ;打印十六进制数
 ;参数在bx
 phex PROC FAR
-    PUSH AL
+    PUSH AX
     MOV AL,Bh
     CALL B2H
     MOV AL,BL
     CALL B2H
-    POP AL
+    POP AX
     RET
 phex ENDP
 ;
