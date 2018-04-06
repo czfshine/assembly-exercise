@@ -5,6 +5,7 @@
 ;在内存区域0B800:0000-0B800:0FFFF（都是16进制数）内
 ;查找首地址为SOURCE的串（SOURCE的首字节为串长度），
 ;如果找到，则把AL的第0位置0，否则将该位置置1
+;todo 
 
 ; The Main Data segment
 DATA SEGMENT
