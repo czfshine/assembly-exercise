@@ -1,7 +1,10 @@
+
 ; 8086 assembly file
 ; by:czfshine
 ; date: 2018/04/03 12:18:43
 ;试编制一个程序，把BX寄存器内的二进制数以十进制数的形式在屏幕上显示出来。
+
+INCLUDE BASE.INC
 ; The Main Data segment
 DATA SEGMENT
 DATA ENDS
@@ -26,26 +29,7 @@ START:                ;entry point
     ;push all
 
     MOV SI,10 ;BASE
-
-
-    XOR CX,CX;
-    MOV AX,BX
-    p:
-        MOV DX,0
-        DIV SI ;dx ax / 10 = ax......dx
-        push dx
-        inc cl
-        cmp ax ,0
-    jnz p 
-
-    ;pop & print
-    mov ah,02h
-    pr:
-        pop dx
-        add dl,'0'
-        int 21H
-    loop pr
-
+    CALL REBASE
     MOV AH,4CH     ;return
     INT 21H
 CODE ENDS
