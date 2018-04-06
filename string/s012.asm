@@ -5,9 +5,11 @@
 ;已知数组A包含15个互不相等的整数，数组B包含20个互不相等的整数。
 ;试编制一个程序，把既在A中又在B中出现的整数存放于数组C中。
 
+
 ;算法复杂度可达nlogn,但是需要排序函数（todo），所以改用n^2的算法
 ;显然B比较大，所以从B取数与a比较即可
 
+;还有可以用bitmap(todo)，复杂度n，但是空间复杂度太高（题目说互不相同emmmmmmm)
 
 ; The Main Data segment
 DATA SEGMENT
@@ -65,7 +67,7 @@ findBinA:
     cld
     repnz scasb es:[di]
     CMP DI,alen
-    jz canfind
+jz canfind
     lea di,C_
     mov bl,[clen]
     mov bh,0
@@ -74,6 +76,8 @@ findBinA:
     mov bl,clen
     inc bl
     mov clen,bl
+
+    
 canfind:
     pop cx
     pop es
