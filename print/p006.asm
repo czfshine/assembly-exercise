@@ -6,10 +6,8 @@
 
 ; The Main Data segment
 
-INCLUDE base.inc
-INCLUDE until.inc
+include scan.inc
 DATA SEGMENT
-    ov DB 'OverFLow',0DH,0AH,'$';
 DATA ENDS
 
 STACK SEGMENT
@@ -24,43 +22,17 @@ START:                ;entry point
     MOV AX,STACK
     MOV SS,AX
 
-    xor bx,bx
-    mov si,10
-    
-    I:
-        mov ah,01h
-        int 21H
-        cmp al,0Dh
-        je r
-        cmp al,'0'
-        jb I
-        cmp al,'9'
-        ja I
-        sub al,30h
-        mov ah,0
-        MOV DX,0
-        xchg bx,AX
-        mul si
-        CMP DX,0
-        JNZ o
-        CLC
-        add bx,ax
-        JC o
-        JMP I
-    R:  
-        call CRLF
-        MOV SI,2
-        CALL REBASE
-        CALL CRLF
-        JMP RETURN
-    O:
-        call CRLF
-        mov ah,09h
-        lea dx,ov
-        int 21H
-        jmp return 
+    mov di,16
+    call inputnumbybase
 
-RETURN:
+    cmp di,0
+    je return1
+    
+    call CRLF
+    MOV SI,2
+    CALL REBASE
+    CALL CRLF
+return1:
     MOV AH,4CH     ;return
     INT 21H
 CODE ENDS
