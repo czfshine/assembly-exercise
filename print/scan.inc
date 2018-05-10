@@ -31,7 +31,7 @@ scan SEGMENT
         mov dh,0
         mov dl,[bx+si]
         cmp dl,-1
-        je I
+    je I
 
         MOV DX,0
         xchg cx,AX
@@ -53,16 +53,16 @@ scan SEGMENT
         JC o
     lo:
         mov cx,ax
-        JMP I
+    JMP I
     negnum:
         mov bp,1
-        jmp I
+    jmp I
     O:
         call CRLF
         mov ah,09h
         lea dx,ov
         int 21H
-        jmp return 
+    jmp return 
     okret:
         mov di,bp
     return :

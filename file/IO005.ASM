@@ -1,0 +1,38 @@
+; 8086 assembly file
+; by:czfshine
+; date: 2018/05/10 10:37:05
+
+INCLUDE FILE.INC
+
+; The Main Data segment
+DATA SEGMENT
+    OUTFILE DB "D:\ABC.TXT",0
+    OUTFH DW ?
+    STR2 DB "abcdefg"
+    ls2 equ $-STR2
+    STR1 DB "123456"
+    ls1 equ $-STR1
+DATA ENDS
+
+STACK SEGMENT
+DW 256 DUP(?)
+STACK ENDS
+;entry code segment
+CODE SEGMENT
+    ASSUME CS:CODE ,DS:DATA,SS:STACK
+START:                ;entry point
+    MOV AX,DATA
+    MOV DS,AX
+    MOV AX,STACK
+    MOV SS,AX
+    
+    FOPEN OUTFH,OUTFILE,00H,FILEERROR
+    FILEWRITESTR OUTFH,STR1,ls1,FILEERROR
+    FILEWRITESTR OUTFH,STR2,ls2,FILEERROR
+    FCLOSE OUTFH
+FILEERROR:
+
+    MOV AH,4CH     ;return
+    INT 21H
+CODE ENDS
+END START

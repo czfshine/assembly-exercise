@@ -1,0 +1,34 @@
+; 8086 assembly file
+; by:czfshine
+; date: 2018/05/10 10:47:02
+
+include FILE.INC
+; The Main Data segment
+DATA SEGMENT
+    OUTFILE DB "D:\A32K.BIN",0
+    OUTFH DW ?
+    LEN EQU 8000H
+DATA ENDS
+
+STACK SEGMENT
+DW 256 DUP(?)
+STACK ENDS
+;entry code segment
+CODE SEGMENT
+    ASSUME CS:CODE ,DS:DATA,SS:STACK
+START:                ;entry point
+    MOV AX,DATA
+    MOV DS,AX
+    MOV AX,STACK
+    MOV SS,AX
+    
+    FOPEN OUTFH,OUTFILE,00H,FILEERROR
+    FWRITEMEM OUTFH,0A00H,LEN,FILEERROR
+    FCLOSE OUTFH
+
+FILEERROR:
+
+    MOV AH,4CH     ;return
+    INT 21H
+CODE ENDS
+END START
