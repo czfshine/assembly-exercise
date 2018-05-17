@@ -1,6 +1,7 @@
 ; 8086 assembly file
 ; by:czfshine
 ; date: 2018/05/17 11:03:49
+;todo
 nextw MACRO reg
     inc reg
     inc reg
