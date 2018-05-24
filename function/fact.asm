@@ -16,7 +16,7 @@ CODE SEGMENT
     ASSUME CS:CODE ,DS:DATA,SS:STACK
      ;计算x的阶乘，压入y中
     FACT PROC  C uses ax dx, 
-                x:word,y:word ;void fact(short x,short&y){
+                x:word,y:word ;void fact(short x,short& y){
         mov ax,2              ;     if(x<2){
         cmp x,ax              ;         y=1;
         jb exit1              ;         return ;}
@@ -44,11 +44,15 @@ START:                ;entry point
     
     xor ax,ax
     push ax ;返回值
-    mov ax,6
+    mov ax,9
     push ax ;参数
+    
     call FACT
+    
     pop ax
     pop ax;返回值
+
+
     MOV AH,4CH     ;return
     INT 21H
 CODE ENDS
