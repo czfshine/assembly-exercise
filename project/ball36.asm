@@ -56,7 +56,8 @@ MAIN  PROC FAR
       INC DI
       CMP DI,7
       JNE L1
-
+        MOV BX,OFFSET NUM
+      PUSH BX
       XOR SI,SI
       CALL FAR PTR SHOW ;打印球
       MOV AH,4CH
@@ -97,18 +98,19 @@ DELETE PROC FAR
        PUSH BX
        PUSH DX
        PUSH CX
+        push di
        MOV DI,SI ;将上面抽中的数字存在DI
        PUSH SI
        MOV SI,[BP+0AH] ;BALL
        MOV BX,[BP+8] ;COUNT
-
-       MOV AX,[BX]
+        xor ax,ax
+       MOV Al,[BX]
        SUB AX,DI;计算删除元素要移动几次
        ADD SI,DI;指向抽中的BALL[DI]
        MOV BX,SI
        INC BX  ;BX指向BALL[DI+1]
-    L2:MOV DX,[BX]
-       MOV [SI],DX;用BALL[DI+1]覆盖掉BALL[DI]
+    L2:MOV DL,[BX]
+       MOV [SI],DL;用BALL[DI+1]覆盖掉BALL[DI]
        INC SI
        INC BX;移动指针
        DEC AX;计数
@@ -116,11 +118,12 @@ DELETE PROC FAR
 
        XOR AX,AX
        MOV SI,[BP+8]
-       MOV AX,[SI]
+       MOV Al,[SI]
        DEC AX
-       MOV [SI],AX;删除完毕，剩余球的数量COUNT-1
+       MOV [SI],Al;删除完毕，剩余球的数量COUNT-1
 
        POP SI
+       pop di
        POP CX
        POP DX
        POP BX
@@ -139,7 +142,9 @@ DELETE PROC FAR
        PUSH DX
        PUSH CX
        PUSH DI
+
        MOV SI,[BP+6];指向NUM
+
        XOR DI,DI
    ;输出两位数
     L3:MOV DL,[SI]
@@ -159,9 +164,12 @@ DELETE PROC FAR
        MOV DL,' '
        MOV AH,02H
        INT 21H
+       inc SI
        INC DI
        CMP DI,7
        JNE L3
+
+
        POP DI
        POP CX
        POP DX
