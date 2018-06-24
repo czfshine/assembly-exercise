@@ -14,6 +14,7 @@ DATA ENDS
 
 STACK SEGMENT
 DW 256 DUP(?)
+TOP LABEL WORD 
 STACK ENDS
 ;entry code segment
 CODE SEGMENT
@@ -23,7 +24,7 @@ START:                ;entry point
     MOV DS,AX
     MOV AX,STACK
     MOV SS,AX
-    
+    LEA SP,TOP
     lea bx,M    
     mov si,0
     s:
