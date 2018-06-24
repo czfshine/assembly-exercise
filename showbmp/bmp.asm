@@ -49,11 +49,6 @@ SHOW32BITBY16 MACRO POS
     pop SI
     POP DI
 ENDM
-
-showdata segment
-    
-showdata ENDS
-
 show segment
     ;输出Dx指向的字符串，以$结尾，并换行
     printstrln_ PROC FAR USES ax dx
@@ -92,30 +87,41 @@ show segment
     ENDM
 show ENDS
 
-setcolor MACRO id,r,g,b
-    mov al,id
-    mov dx,03c8h
-    out dx,al
+stdio segment
+    ;get a char to AL 
+    getchar PROC FAR
+        mov ah,07
+        int 21h
+        RET
+    getchar ENDP
+stdio ENDS
 
-    mov dx,03c9h
-    mov al,r
-    shr al,1
-    shr al,1
-    out dx,al
-    mov al,g
-    shr al,1
-    shr al,1
-    out dx,al
-    mov al,b
-    shr al,1
-    shr al,1
-    out dx,al
-ENDM
-
+parm segment
+    getparmtofilename MACRO 
+        mov bx,80H
+        xor cx,cx
+        mov cl,es:[bx]
+        or cl,cl
+        jz return2
+        lea si,filenamez
+        inc bx
+        dec si;todo 不知道为什么要减一，debug出来的，偏移了一位，修正用
+        a:  
+            mov al,es:[bx]
+            mov [si],al
+            inc bx
+            inc si
+            loop a
+        mov [si],0
+        inc si
+        mov [si],'$'
+        return2:
+    ENDM
+parm ENDS
 ; The Main Data segment
 DATA SEGMENT
-    filenamez db '256.bmp',00
-    filehandle dw 0;
+    filenamez    db 255 DUP(0),00
+    filehandle   dw 0;
 
     s_filesize   db "File size:   $"
     S_IMGWIDTH   DB "IMAGE WIDTH: $"
@@ -147,7 +153,7 @@ DATA SEGMENT
     COLOER_SIZE DD 0; 调色板大小 4
     DD 4
 
-    colortable db 256 DUP(0,0,0,0);颜色表256个rgba数据
+    colortable    db 256 DUP(0,0,0,0);颜色表256个rgba数据
     colortablelen DW 0;颜色表大小 1 16 256 or COLORSIZE
 
     line db 321 DUP(0);
@@ -160,10 +166,16 @@ STACK ENDS
 CODE SEGMENT
     ASSUME CS:CODE ,DS:DATA,SS:STACK
     Main PROC FAR      ;entry point
+
     MOV AX,DATA
     MOV DS,AX
     MOV AX,STACK
     MOV SS,AX
+
+    getparmtofilename
+    lea dx,filenamez
+    call printstrln_
+
 
     ;;open&read filehead 
     mov ah,3dh
@@ -185,7 +197,7 @@ CODE SEGMENT
     jnz type_e ;文件类型错误
 
     call SHOWINFO
-
+    call getchar
     lea bx,dibsize
     mov bl,[bx]
     cmp bl,BITMAPINFOHEADER;文件头应该是40
@@ -201,7 +213,27 @@ CODE SEGMENT
     int 10h
 
     CALL readcolortable
+    setcolor MACRO id,r,g,b
+        ;cli
+        mov al,id
+        mov dx,03c8h
+        out dx,al
 
+        mov dx,03c9h
+        mov al,r
+        shr al,1
+        shr al,1
+        out dx,al
+        mov al,g
+        shr al,1
+        shr al,1
+        out dx,al
+        mov al,b
+        shr al,1
+        shr al,1
+        out dx,al
+        ;sti
+    ENDM
     mov cx,colortablelen;颜色表长度为2^bits
     mov si,0  ;rgb: colortable[si+2] colortable[si+1] colortable[si]  +4
     mov bx,0  ;颜色号 +1
@@ -212,7 +244,6 @@ CODE SEGMENT
         inc si
         inc si
         inc si
-
         inc bl
         POP CX
     loop writecolorloop
@@ -229,11 +260,13 @@ CODE SEGMENT
 
     mov dx,0a000h
     mov es,dx
-    mov di,320*199
+
+    call getscreenpos;设置di
     writelineloop:
         ;读一行数据
         push cx
-        mov cx,320;
+        lea bx,imgwidth
+        mov cx,[bx];
         mov bx,filehandle ;
         mov ah,3fh
         lea dx,line
@@ -246,19 +279,44 @@ CODE SEGMENT
         ;es 显存的段地址
         ;ds 像素数据的段地址
         ;bp 写入的长度，<=320
-        MOV BP,320
+        lea bx,imgwidth
+        mov bp,[bx];
         call writeline
         sub di,320
         pop cx
     loop writelineloop
+
+    errorcount=0
+    msg MACRO count,msg1
+    errormsg&count db msg1,'$'
+    printstrln errormsg&count
+    ENDM
+
+    showandreturn MACRO STRING
+    msg % errorcount,STRING
+    errorcount=errorcount+1
+    JMP exit
+    ENDM
     open_e:
+        showandreturn "[ERROR]OPEN FILE FAIL"
     type_e:
+        showandreturn "[ERROR]NOT BMP FILE"
     imgtype_e:
+        showandreturn "[ERROR]NOT 8 BITS IMAGE"
     depth_e:
+        showandreturn "[ERROR]NOT 8 BITS IMAGE"
     readcolor_e:
+        showandreturn "[ERROR]CAN'T READ COLOR"
     bigimg_e:
+        showandreturn "[ERROR]TOO BIG IMAGE"
     readline_e:
+        showandreturn "[ERROR]CAN'T READ LINE"
     TOOBIGBITS_E:
+        showandreturn "[ERROR]BITS TOO GREAD"
+    exit:
+        call getchar
+        MOV AX,0003H
+        INT 10H
         MOV AH,4CH     ;return
         INT 21H
     RET
@@ -286,7 +344,7 @@ CODE SEGMENT
     ;di 显存的首地址
     ;es 显存的段地址
     ;ds 像素数据的段地址
-    ;dx 写入的长度，<=320
+    ;bp 写入的长度，<=320
     writeline PROC FAR uses cx si di ds es dx  bp
         mov cx,bp
         rep movsb 
@@ -325,5 +383,16 @@ CODE SEGMENT
         INT 21H;READFILE
         RET
     readcolortable ENDP
+    ;要显示图片左下角位置在显存的偏移量
+    ;di=（图片高度-1）*320
+    getscreenpos PROC FAR uses bx ax dx
+        lea bx,imgheight
+        mov bx,[bx]
+        dec bx
+        mov ax,320
+        mul bx
+        mov di,ax;dx舍弃掉，因为就算超过16位，也没意义，显示不了
+        RET
+    getscreenpos ENDP
 CODE ENDS
 END MAIN
