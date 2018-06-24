@@ -56,8 +56,7 @@ MAIN  PROC FAR
       INC DI
       CMP DI,7
       JNE L1
-        MOV BX,OFFSET NUM
-      PUSH BX
+        
       XOR SI,SI
       CALL FAR PTR SHOW ;打印球
       MOV AH,4CH
